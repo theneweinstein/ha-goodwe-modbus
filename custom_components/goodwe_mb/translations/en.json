@@ -1,0 +1,111 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "If you need help with the configuration have a look here.",
+                "data": {
+                    "address": "Address",
+                    "protocol": "Protocol",
+                    "unit_id": "Unit ID"
+                },
+                "data_description": {
+                    "address": "The address of the modbus hub (including the port number).",
+                    "protocol": "The connection protocol. For serial over ethernet, start the address with socket://",
+                    "unit_id": "The unit id of the inverter on the modbus hub."
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Unable to connect to the modbus hub.",
+            "unknown": "Unknown error occurred."
+        },
+        "abort": {
+            "already_configured": "This entry is already configured."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "voltage_l": {
+                "name": "Voltage L{phase}"
+            },
+            "current_l": {
+                "name": "Current L{phase}"
+            },
+            "frequency_l": {
+                "name": "Frequency L{phase}"
+            },
+            "power_l": {
+                "name": "Power L{phase}"
+            },
+            "power": {
+                "name": "Power"
+            },
+            "system_state": {
+                "name": "System state",
+                "state": {
+                    "wait": "Wait",
+                    "normal": "Normal",
+                    "fault": "Fault"
+                }
+            },
+            "generation_time_total": {
+                "name": "Generation time total"
+            },
+            "inverter_temperature": {
+                "name": "Temperature invertor"
+            },
+            "pv_voltage": {
+                "name": "Voltage string {string}"
+            },
+            "pv_current": {
+                "name": "Current string {string}"
+            },
+            "pv_power": {
+                "name": "Power string {string}"
+            },
+            "energy_today": {
+                "name": "Energy produced today"
+            },
+            "energy_total": {
+                "name": "Energy produced total"
+            }
+        },
+        "binary_sensor": {
+            "fault_ac_output": {
+                "name": "AC output"
+            },
+            "fault_communication": {
+                "name": "Communication"
+            },
+            "fault_dc_bus": {
+                "name": "DC bus"
+            },
+            "fault_fan": {
+                "name": "Fan"
+            },
+            "fault_grid": {
+                "name": "Grid"
+            },
+            "fault_insulation": {
+                "name": "Insulation"
+            },
+            "fault_internal": {
+                "name": "Internal"
+            },
+            "fault_pv": {
+                "name": "PV"
+            },
+            "fault_sales": {
+                "name": "Contact sales"
+            },
+            "fault_thermal": {
+                "name": "Thermal"
+            }
+        },
+        "number": {
+            "active_power": {
+                "name": "Active power limit"
+            }
+        }
+    }
+}

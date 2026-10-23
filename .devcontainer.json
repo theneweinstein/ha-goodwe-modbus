@@ -1,5 +1,5 @@
 {
-    "name": "ludeeus/integration_blueprint",
+    "name": "tludeeus/ha-goodwe-modbus",
     "image": "mcr.microsoft.com/devcontainers/base:debian",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [
@@ -11,6 +11,9 @@
             "onAutoForward": "notify"
         }
     },
+    "mounts": [
+        "source=/home/ruud/Goodwe/goodwe_modbus,target=/workspaces/goodwe_modbus,type=bind,consistency=cached"
+    ],
     "customizations": {
         "vscode": {
             "extensions": [

@@ -1,0 +1,28 @@
+{
+  "domain": "goodwe_mb",
+  "name": "Goodwe Inverter Modbus",
+  "categories": [
+    "energy.solar"
+  ],
+  "codeowners": [
+    "@ludeeus"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "modbus",
+    "usb"
+  ],
+  "documentation": "https://github.com/ludeeus/integration_blueprint",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "loggers": [
+    "modbus_connection",
+    "goodwe_mb",
+    "tmodbus"
+  ],
+  "requirements": [
+    "goodwe-modbus"
+  ],
+  "issue_tracker": "https://github.com/ludeeus/integration_blueprint/issues",
+  "version": "0.1.0"
+}
