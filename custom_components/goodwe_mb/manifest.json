@@ -5,14 +5,14 @@
     "energy.solar"
   ],
   "codeowners": [
-    "@ludeeus"
+    "@theneweinstein"
   ],
   "config_flow": true,
   "dependencies": [
     "modbus",
     "usb"
   ],
-  "documentation": "https://github.com/ludeeus/integration_blueprint",
+  "documentation": "https://github.com/theneweinstein/ha-goodwe-modbus",
   "integration_type": "device",
   "iot_class": "local_polling",
   "loggers": [
@@ -23,6 +23,6 @@
   "requirements": [
     "goodwe-modbus"
   ],
-  "issue_tracker": "https://github.com/ludeeus/integration_blueprint/issues",
+  "issue_tracker": "https://github.com/theneweinstein/ha-goodwe-modbus/issues",
   "version": "0.1.0"
 }

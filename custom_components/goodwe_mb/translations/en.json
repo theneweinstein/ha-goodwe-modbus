@@ -6,21 +6,44 @@
                 "data": {
                     "address": "Address",
                     "protocol": "Protocol",
-                    "unit_id": "Unit ID"
+                    "unit_id": "Unit ID",
+                    "scan_interval": "Scan interval",
+                    "power_scan_interval": "Power scan interval"
                 },
                 "data_description": {
                     "address": "The address of the modbus hub (including the port number).",
                     "protocol": "The connection protocol. For serial over ethernet, start the address with socket://",
-                    "unit_id": "The unit id of the inverter on the modbus hub."
+                    "unit_id": "The unit id of the inverter on the modbus hub.",
+                    "scan_interval": "How often to poll all sensors (seconds).",
+                    "power_scan_interval": "How often to poll the power sensor (seconds). Must be shorter than the scan interval to take effect."
+                }
+            },
+            "reconfigure": {
+                "description": "Update the connection settings for {model} (serial: {serial}).",
+                "data": {
+                    "address": "Address",
+                    "protocol": "Protocol",
+                    "unit_id": "Unit ID",
+                    "scan_interval": "Scan interval",
+                    "power_scan_interval": "Power scan interval"
+                },
+                "data_description": {
+                    "address": "The address of the modbus hub (including the port number).",
+                    "protocol": "The connection protocol. For serial over ethernet, start the address with socket://",
+                    "unit_id": "The unit id of the inverter on the modbus hub.",
+                    "scan_interval": "How often to poll all sensors (seconds).",
+                    "power_scan_interval": "How often to poll the power sensor (seconds). Must be shorter than the scan interval to take effect."
                 }
             }
         },
         "error": {
             "cannot_connect": "Unable to connect to the modbus hub.",
+            "serial_mismatch": "The inverter at the new address has a different serial number. This integration is tied to the original inverter.",
             "unknown": "Unknown error occurred."
         },
         "abort": {
-            "already_configured": "This entry is already configured."
+            "already_configured": "This entry is already configured.",
+            "reconfigure_successful": "The configuration has been updated."
         }
     },
     "entity": {
@@ -52,7 +75,7 @@
                 "name": "Generation time total"
             },
             "inverter_temperature": {
-                "name": "Temperature invertor"
+                "name": "Inverter temperature"
             },
             "pv_voltage": {
                 "name": "Voltage string {string}"

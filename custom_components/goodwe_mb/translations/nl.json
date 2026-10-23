@@ -1,0 +1,134 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "description": "Als u hulp nodig hebt bij de configuratie, kijk dan hier.",
+                "data": {
+                    "address": "Adres",
+                    "protocol": "Protocol",
+                    "unit_id": "Unit ID",
+                    "scan_interval": "Scaninterval",
+                    "power_scan_interval": "Scaninterval vermogen"
+                },
+                "data_description": {
+                    "address": "Het adres van de modbus-hub (inclusief poortnummer).",
+                    "protocol": "Het verbindingsprotocol. Gebruik socket:// voor seriële verbinding via ethernet.",
+                    "unit_id": "De unit-id van de omvormer op de modbus-hub.",
+                    "scan_interval": "Hoe vaak alle sensoren worden uitgelezen (seconden).",
+                    "power_scan_interval": "Hoe vaak de vermogenssensor wordt uitgelezen (seconden). Moet korter zijn dan het scaninterval om effect te hebben."
+                }
+            },
+            "reconfigure": {
+                "description": "Wijzig de verbindingsinstellingen voor {model} (serie: {serial}).",
+                "data": {
+                    "address": "Adres",
+                    "protocol": "Protocol",
+                    "unit_id": "Unit ID",
+                    "scan_interval": "Scaninterval",
+                    "power_scan_interval": "Scaninterval vermogen"
+                },
+                "data_description": {
+                    "address": "Het adres van de modbus-hub (inclusief poortnummer).",
+                    "protocol": "Het verbindingsprotocol. Gebruik socket:// voor seriële verbinding via ethernet.",
+                    "unit_id": "De unit-id van de omvormer op de modbus-hub.",
+                    "scan_interval": "Hoe vaak alle sensoren worden uitgelezen (seconden).",
+                    "power_scan_interval": "Hoe vaak de vermogenssensor wordt uitgelezen (seconden). Moet korter zijn dan het scaninterval om effect te hebben."
+                }
+            }
+        },
+        "error": {
+            "cannot_connect": "Kan geen verbinding maken met de modbus-hub.",
+            "serial_mismatch": "De omvormer op het nieuwe adres heeft een ander serienummer. Deze integratie is gekoppeld aan de oorspronkelijke omvormer.",
+            "unknown": "Er is een onbekende fout opgetreden."
+        },
+        "abort": {
+            "already_configured": "Deze integratie is al geconfigureerd.",
+            "reconfigure_successful": "De configuratie is bijgewerkt."
+        }
+    },
+    "entity": {
+        "sensor": {
+            "voltage_l": {
+                "name": "Spanning L{phase}"
+            },
+            "current_l": {
+                "name": "Stroom L{phase}"
+            },
+            "frequency_l": {
+                "name": "Frequentie L{phase}"
+            },
+            "power_l": {
+                "name": "Vermogen L{phase}"
+            },
+            "power": {
+                "name": "Vermogen"
+            },
+            "system_state": {
+                "name": "Systeemstatus",
+                "state": {
+                    "wait": "Wacht",
+                    "normal": "Normaal",
+                    "fault": "Storing"
+                }
+            },
+            "generation_time_total": {
+                "name": "Totale opwekkingstijd"
+            },
+            "inverter_temperature": {
+                "name": "Omvormertemperatuur"
+            },
+            "pv_voltage": {
+                "name": "Spanning string {string}"
+            },
+            "pv_current": {
+                "name": "Stroom string {string}"
+            },
+            "pv_power": {
+                "name": "Vermogen string {string}"
+            },
+            "energy_today": {
+                "name": "Vandaag opgewekte energie"
+            },
+            "energy_total": {
+                "name": "Totaal opgewekte energie"
+            }
+        },
+        "binary_sensor": {
+            "fault_ac_output": {
+                "name": "AC-uitgang"
+            },
+            "fault_communication": {
+                "name": "Communicatie"
+            },
+            "fault_dc_bus": {
+                "name": "DC-bus"
+            },
+            "fault_fan": {
+                "name": "Ventilator"
+            },
+            "fault_grid": {
+                "name": "Net"
+            },
+            "fault_insulation": {
+                "name": "Isolatie"
+            },
+            "fault_internal": {
+                "name": "Intern"
+            },
+            "fault_pv": {
+                "name": "PV"
+            },
+            "fault_sales": {
+                "name": "Neem contact op met verkoop"
+            },
+            "fault_thermal": {
+                "name": "Thermisch"
+            }
+        },
+        "number": {
+            "active_power": {
+                "name": "Actief vermogen limiet"
+            }
+        }
+    }
+}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import date, timedelta
 from enum import IntEnum
 from typing import TYPE_CHECKING, cast, override
 
@@ -24,12 +25,14 @@ from homeassistant.const import (
     UnitOfTemperature,
     UnitOfTime,
 )
+from homeassistant.core import callback
+from homeassistant.helpers.event import async_track_point_in_time
+from homeassistant.util import dt as dt_util
 
 from .entity import GoodweEntity, GoodweEntityDescription
 
 if TYPE_CHECKING:
     from collections.abc import Callable
-    from datetime import date
 
     from goodwe_modbus.device import GoodweInverter
     from homeassistant.core import HomeAssistant
@@ -41,7 +44,7 @@ if TYPE_CHECKING:
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
+    hass: HomeAssistant,  # noqa: ARG001
     entry: GoodweConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
@@ -56,8 +59,10 @@ async def async_setup_entry(
 
 def _sensor_class(
     description: GoodweSensorDescription,
-) -> type[GoodweSensor | GoodweTotalSensor]:
+) -> type[GoodweSensor | GoodweTotalSensor | GoodweDailyResetSensor]:
     """Pick the entity class a description's semantics ask for."""
+    if description.daily_reset:
+        return GoodweDailyResetSensor
     if description.state_class in (
         SensorStateClass.TOTAL,
         SensorStateClass.TOTAL_INCREASING,
@@ -107,12 +112,73 @@ class GoodweTotalSensor(GoodweEntity, RestoreSensor):
             self._attr_native_value = value
         return cast("int | float | None", self._attr_native_value)
 
+    @property
+    @override
+    def available(self) -> bool:
+        """Stay available when the inverter is offline so the restored value is visible."""
+        if self.entity_description.stale_available:
+            return True
+        return super().available
+
 
 @dataclass(frozen=True, kw_only=True)
 class GoodweSensorDescription(SensorEntityDescription, GoodweEntityDescription):
     """Describe a Goodwe sensor."""
 
     value_fn: Callable[[GoodweInverter], float | None]
+    daily_reset: bool = False
+    stale_available: bool = False
+
+
+class GoodweDailyResetSensor(GoodweTotalSensor):
+    """
+    Goodwe sensor whose value resets to 0 at midnight.
+
+    The underlying inverter register is a daily cumulative total that the
+    inverter itself resets to 0 at midnight.  HA should reset the stored
+    value at the same time so the energy dashboard does not see a spike.
+
+    On HA restart after midnight the inverter may not yet answer (e.g. at
+    night).  The last known value is restored from the database so the
+    energy dashboard has continuity until the inverter comes back online.
+    Once the inverter answers the live value always takes over, even when
+    it is lower than the restored value (the new day has started).
+    """
+
+    _unsub_midnight: Callable[[], None] | None = None
+
+    @override
+    async def async_added_to_hass(self) -> None:
+        """Restore last value and schedule the midnight reset."""
+        await super().async_added_to_hass()
+        self._schedule_midnight_reset()
+
+    @override
+    async def async_will_remove_from_hass(self) -> None:
+        """Cancel the midnight reset when the entity is removed."""
+        if self._unsub_midnight is not None:
+            self._unsub_midnight()
+            self._unsub_midnight = None
+        await super().async_will_remove_from_hass()
+
+    @callback
+    def _schedule_midnight_reset(self) -> None:
+        """Schedule the value to be reset at the next midnight."""
+        if self._unsub_midnight is not None:
+            self._unsub_midnight()
+
+        now = dt_util.now()
+        next_midnight = dt_util.start_of_local_day(now + timedelta(days=1))
+        self._unsub_midnight = async_track_point_in_time(
+            self.hass, self._async_reset, next_midnight
+        )
+
+    @callback
+    def _async_reset(self, now: date) -> None:
+        """Reset the sensor value to 0 and re-schedule for the next midnight."""
+        self._attr_native_value = 0.0
+        self.async_write_ha_state()
+        self._schedule_midnight_reset()
 
 
 SENSOR_DESCRIPTIONS: tuple[GoodweSensorDescription, ...] = (
@@ -238,7 +304,7 @@ SENSOR_DESCRIPTIONS: tuple[GoodweSensorDescription, ...] = (
     ),
     GoodweSensorDescription(
         key="power",
-        component="grid",
+        component="grid_fast",
         translation_key="power",
         device_class=SensorDeviceClass.POWER,
         native_unit_of_measurement=UnitOfPower.WATT,
@@ -339,6 +405,8 @@ SENSOR_DESCRIPTIONS: tuple[GoodweSensorDescription, ...] = (
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
+        daily_reset=True,
+        stale_available=True,
         value_fn=lambda device: device.energy.daily_energy,
     ),
     GoodweSensorDescription(
@@ -348,6 +416,7 @@ SENSOR_DESCRIPTIONS: tuple[GoodweSensorDescription, ...] = (
         device_class=SensorDeviceClass.ENERGY,
         native_unit_of_measurement=UnitOfEnergy.KILO_WATT_HOUR,
         state_class=SensorStateClass.TOTAL_INCREASING,
+        stale_available=True,
         value_fn=lambda device: device.energy.lifetime_energy,
     ),
 )

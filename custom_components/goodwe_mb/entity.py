@@ -1,4 +1,4 @@
-"""BlueprintEntity class."""
+"""GoodweEntity base class."""
 
 from __future__ import annotations
 
@@ -34,7 +34,11 @@ class GoodweEntity(CoordinatorEntity[GoodweDataUpdateCoordinator]):
         """Initialize."""
         super().__init__(runtime_data.coordinator_for(entity_description.component))
         self.entity_description = entity_description
-        serial = self.coordinator.device.identity.serial
+        serial = (
+            self.coordinator.device.identity.serial
+            or self.coordinator.config_entry.unique_id
+            or "unknown"
+        )
         self._attr_unique_id = f"{serial}_{entity_description.key}"
         self._attr_device_info = self.coordinator.device_info
 

@@ -1,5 +1,5 @@
 {
-    "name": "tludeeus/ha-goodwe-modbus",
+    "name": "theneweinstein/ha-goodwe-modbus",
     "image": "mcr.microsoft.com/devcontainers/base:debian",
     "postCreateCommand": "scripts/setup",
     "forwardPorts": [

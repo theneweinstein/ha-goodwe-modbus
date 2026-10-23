@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 class GoodweFaultBinarySensorDescription(
     GoodweEntityDescription, BinarySensorEntityDescription
 ):
-    """Describe a Sofar fault-category binary sensor."""
+    """Describe a Goodwe fault-category binary sensor."""
 
     category: FaultCategory
 
@@ -45,7 +45,7 @@ FAULT_SENSOR_DESCRIPTIONS: tuple[GoodweFaultBinarySensorDescription, ...] = tupl
 
 
 async def async_setup_entry(
-    hass: HomeAssistant,  # noqa: ARG001 Unused function argument: `hass`
+    hass: HomeAssistant,  # noqa: ARG001
     entry: GoodweConfigEntry,
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:

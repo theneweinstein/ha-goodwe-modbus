@@ -20,10 +20,15 @@ from homeassistant.const import (
     Platform,
 )
 from homeassistant.core import HomeAssistant, callback
-from homeassistant.helpers.update_coordinator import UpdateFailed
-from modbus_connection import ModbusSerialParams, ModbusTcpParams, ModbusTimeoutError
+from homeassistant.exceptions import ConfigEntryNotReady
+from modbus_connection import ModbusSerialParams, ModbusTcpParams
 
-from .const import CONF_UNIT_ID, SCAN_INTERVAL
+from .const import (
+    CONF_POWER_SCAN_INTERVAL,
+    CONF_UNIT_ID,
+    POWER_SCAN_INTERVAL,
+    SCAN_INTERVAL,
+)
 from .coordinator import (
     GoodweConfigEntry,
     GoodweDataUpdateCoordinator,
@@ -55,47 +60,61 @@ async def async_setup_entry(
         entry.data[CONF_UNIT_ID],
     )
     device = GoodweInverter(unit)
+    scan_interval = timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL))
     readings = GoodweDataUpdateCoordinator(
         hass,
         entry,
         device,
         device.async_update_readings,
-        timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL)),
+        scan_interval,
     )
     settings = GoodweDataUpdateCoordinator(
         hass,
         entry,
         device,
         device.async_update_settings,
-        timedelta(seconds=entry.data.get(CONF_SCAN_INTERVAL, SCAN_INTERVAL)),
+        scan_interval,
     )
+    # Fast grid coordinator for the power sensor.
+    power_scan_interval = timedelta(
+        seconds=entry.data.get(CONF_POWER_SCAN_INTERVAL, POWER_SCAN_INTERVAL)
+    )
+    grid_fast: GoodweDataUpdateCoordinator | None = None
+    if power_scan_interval < scan_interval:
+        grid_fast = GoodweDataUpdateCoordinator(
+            hass,
+            entry,
+            device,
+            device.async_update_grid,
+            power_scan_interval,
+        )
     try:
         await readings.async_config_entry_first_refresh()
-    except Exception as err:
-        failure = readings.last_exception
-        if not (
-            isinstance(failure, UpdateFailed)
-            and isinstance(failure.__cause__, ModbusTimeoutError)
-        ):
-            raise
+    except ConfigEntryNotReady:
+        # Inverter is offline (night, no solar). Set up the platform anyway
+        # so the energy sensors stay available with their last restored values.
+        # They will get live data once the inverter comes back online.
         _LOGGER.info(
-            "%s: inverter is not answering, setting up without it: %s",
+            "%s: inverter is not answering, setting up without live data: %s",
             entry.title,
-            err,
+            readings.last_exception,
         )
 
         @callback
         def _async_reload_once_answered() -> None:
-            """Set up again in full once the inverter answers."""
+            """Reload the entry once the inverter answers."""
             if readings.last_update_success:
                 hass.config_entries.async_schedule_reload(entry.entry_id)
 
         entry.async_on_unload(readings.async_add_listener(_async_reload_once_answered))
     else:
         await settings.async_refresh()
+        if grid_fast is not None:
+            await grid_fast.async_refresh()
     entry.runtime_data = GoodweRuntimeData(
         readings=readings,
         settings=settings,
+        grid_fast=grid_fast,
         inverter_device_id=entry.data[CONF_UNIT_ID],
     )
 
