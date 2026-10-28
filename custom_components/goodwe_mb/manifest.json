@@ -2,7 +2,7 @@
   "domain": "goodwe_mb",
   "name": "Goodwe Inverter Modbus",
   "categories": [
-    "energy.solar"
+    "integration"
   ],
   "codeowners": [
     "@theneweinstein"
